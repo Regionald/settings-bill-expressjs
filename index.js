@@ -7,9 +7,15 @@ const SettingBills = require('./settings-bill');
 const app = express();
 const settingBill = SettingBills();
 
-
-app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
+const handlebarSetup = exphbs({
+    partialsDir: "./views/partials",
+    viewPath:  './views',
+    layoutsDir : './views/layouts'
+});
+app.engine('handlebars', handlebarSetup);
 app.set('view engine', 'handlebars');
+
+
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -20,13 +26,9 @@ let PORT = process.env.PORT || 8081;
 
 app.get('/', (req, res) => {
 
-    if(settingBill.totals().callTotal>2){
-
-        let warning=document.querySelector('.warningLevel')
-        warning.classList.add('warning')
-    };
     res.render('index',{settings:settingBill.getSettings(),
-    totals:settingBill.totals()});
+    totals:settingBill.totals(),warning:settingBill.hasReachedWarningLevel(),
+    critical:settingBill.hasReachedCriticalLevel()});
 });
 
 app.post('/settings', (req, res) => {
